@@ -242,7 +242,7 @@ class Board:
             if start[1]>end[1]:
                 #moves down
                 for i in range(end[1]+1,start[1]):
-                    if self.get_coords((start[0],i) != None:
+                    if self.get_coords((start[0],i)) != None:
                         obstical = True
             else:
                 #moves up
