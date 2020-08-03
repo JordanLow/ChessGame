@@ -27,6 +27,7 @@ class Board:
     '''
     def __init__(self):
         self.position = {}
+        self.in_check = None
 
     def coords(self):
         '''Return list of piece coordinates.'''
@@ -215,6 +216,7 @@ class Board:
         Returns False otherwise
         '''
         start_piece = self.get_piece(start)
+        other_colour = 'black' if start_piece.colour == 'white' else 'white'
         end_piece = self.get_piece(end)
         if start_piece is None or start_piece.colour != self.turn:
             return False
@@ -311,20 +313,22 @@ class Board:
             self.winner = 'white'
             return
         #this part is for check
-        self.check(self.turn)
+        colour = 'black' if self.turn == 'white' else 'white'
+        self.check(colour)
 
-    def check(self,colour):
+    def check(self, colour):
         for i in self.coords():
             if colour == 'black':
-                if self.get_piece(i).colour == 'black':
-                    if self.valid_move(i,self.get_coords('king','white')[0]):
-                        print('The white king is in check')
-                        return True
-            if colour == 'white':
                 if self.get_piece(i).colour == 'white':
-                    if self.valid_move(i,self.get_coords('king','black')[0]):
+                    if self.get_piece(i).isvalid(i,self.get_coords('king','black')[0]):
                         print('The black king is in check')
                         return True
+            if colour == 'white':
+                if self.get_piece(i).colour == 'black':
+                    if self.get_piece(i).isvalid(i,self.get_coords('king','white')[0]):
+                        print('The white king is in check')
+                        return True
+        return False
 
     def next_turn(self):
         '''Hand the turn over to the other player.'''
