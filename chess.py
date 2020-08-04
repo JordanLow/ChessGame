@@ -25,9 +25,11 @@ class Board:
     01  11  21  31  41  51  61  71
     00  10  20  30  40  50  60  70
     '''
-    def __init__(self):
+    def __init__(self, **kwargs):
         self.position = {}
         self.in_check = None
+        self.inputf = kwargs.get('inputf', input)
+        self.printf = kwargs.get('printf', print)
 
     def coords(self):
         '''Return list of piece coordinates.'''
@@ -125,8 +127,9 @@ class Board:
         '''
         # helper function to generate symbols for piece
         # Row 7 is at the top, so print in reverse order
+        output = ''
         space = ' '
-        print('  a b c d e f g h')
+        output +='  a b c d e f g h\n'
         for row in range(7, -1, -1):
             for col in range(9):
                 if col > 0:
@@ -134,21 +137,22 @@ class Board:
                 
                     if coord in self.coords():
                         piece = self.get_piece(coord)
-                        print(f'{piece.symbol()}',end =' ')
+                        output += f'{piece.symbol()} '
                     else:
                         piece = None
-                        print(' ', end=' ')
+                        output += '  '
                 else:  
                     piece = None
                     for i in range(8):
                         if row == i:
-                            print(f'{i+1}|', end='')
+                            output += f'{i+1}|'
                 
                 for i in range(8):
                     if col == 8 and row == i:
-                        print(f'|{i+1}')
+                        output += f'|{i+1}\n'
                 
-        print('  a b c d e f g h')
+        output += '  a b c d e f g h\n'
+        return output
 
 
     def prompt(self):
@@ -178,18 +182,15 @@ class Board:
             end = (k[end[0]] - 1, int(end[1]) - 1)
             return (start, end)
 
-        while True:
-            inputstr = input(f'{self.turn.title()} player: ')
-            if not valid_input(inputstr):
-                print('Invalid input. Please enter your move in the '
-                      'following format: -_ -_, _ represents a digit from 1 to 8, - represents a letter from a-b')
-            else:
-                start, end = split_and_convert(inputstr)
-                if self.valid_move(start, end):
-                    print(f'{self.get_piece(start)} to {end}')
-                    return start, end
-                else:
-                    print(f'Invalid move for {self.get_piece(start)}.')
+        inputstr = self.inputf(f'{self.turn.title()} player: ')
+        while not valid_input(inputstr):
+            self.printf('Invalid input. Please enter your move in the '
+                  'following format: -_ -_, _ represents a digit from 1 to 8, - represents a letter from a-b')
+            inputstr = self.inputf(f'{self.turn.title()} player: ')
+        start, end = split_and_convert(inputstr)
+        return start, end
+    def format_move(self, start, end):
+        return f'{self.get_piece(start)} to {end}'
 
     def valid_move(self, start, end):
         '''
@@ -216,7 +217,7 @@ class Board:
             self.move(start, end)
             if self.check(start_piece.colour):
                 self.move(end, start)
-                print(f'The {start_piece.colour} king is still in check')
+                self.printf(f'The {start_piece.colour} king is still in check')
                 return False
             self.move(end, start)
 
@@ -299,19 +300,18 @@ class Board:
             return
         #this part is for check
         colour = 'black' if self.turn == 'white' else 'white'
-        self.check(colour)
+        if self.check(colour):
+            self.printf('The {colour} king is in check')
 
     def check(self, colour):
         for i in self.coords():
             if colour == 'black':
                 if self.get_piece(i).colour == 'white':
                     if self.get_piece(i).isvalid(i,self.get_coords('king','black')[0]):
-                        print('The black king is in check')
                         return True
             if colour == 'white':
                 if self.get_piece(i).colour == 'black':
                     if self.get_piece(i).isvalid(i,self.get_coords('king','white')[0]):
-                        print('The white king is in check')
                         return True
         return False
 
