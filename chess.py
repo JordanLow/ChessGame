@@ -202,7 +202,6 @@ class Board:
         Returns False otherwise
         '''
         start_piece = self.get_piece(start)
-        other_colour = 'black' if start_piece.colour == 'white' else 'white'
         end_piece = self.get_piece(end)
         if start_piece is None or start_piece.colour != self.turn:
             return False
@@ -216,8 +215,8 @@ class Board:
         elif self.check(start_piece.colour):
             self.move(start, end)
             if self.check(start_piece.colour):
+                self.printf(f'The {start_piece.colour} king is still in check', 0, 1)
                 self.move(end, start)
-                self.printf(f'The {start_piece.colour} king is still in check')
                 return False
             self.move(end, start)
 
@@ -301,7 +300,7 @@ class Board:
         #this part is for check
         colour = 'black' if self.turn == 'white' else 'white'
         if self.check(colour):
-            self.printf('The {colour} king is in check')
+            self.printf(f'The {colour} king is in check', 0, 1)
 
     def check(self, colour):
         for i in self.coords():
